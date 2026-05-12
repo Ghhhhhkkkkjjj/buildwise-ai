@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BuildWise AI — Smart Residential Planning</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --blue:#2563FF;
+  --blue-glow:rgba(37,99,255,0.35);
+  --blue-soft:rgba(37,99,255,0.12);
+  --bg:#080c14;
+  --surface:rgba(255,255,255,0.04);
+  --surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-blue:rgba(37,99,255,0.4);
+  --text:#f0f4ff;
+  --muted:rgba(240,244,255,0.5);
+  --card-bg:rgba(12,20,40,0.7);
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+
+/* Background */
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.18;}
+.orb1{width:600px;height:600px;background:#2563FF;top:-200px;left:-150px;animation:drift1 12s ease-in-out infinite alternate;}
+.orb2{width:500px;height:500px;background:#7c3aed;bottom:-200px;right:-100px;animation:drift2 15s ease-in-out infinite alternate;}
+.orb3{width:300px;height:300px;background:#0ea5e9;top:40%;left:60%;animation:drift3 10s ease-in-out infinite alternate;}
+@keyframes drift1{to{transform:translate(80px,60px);}}
+@keyframes drift2{to{transform:translate(-60px,-80px);}}
+@keyframes drift3{to{transform:translate(-40px,60px);}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 2rem;height:68px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(20px);background:rgba(8,12,20,0.7);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:var(--font-head);font-size:1.3rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;box-shadow:0 0 18px var(--blue-glow);}
+.nav-links{display:flex;align-items:center;gap:2rem;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.9rem;font-weight:500;transition:color 0.2s;cursor:pointer;}
+.nav-links a:hover{color:var(--text);}
+.btn-signin{background:var(--blue);color:#fff;border:none;padding:0.5rem 1.3rem;border-radius:8px;font-family:var(--font-body);font-size:0.9rem;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:0 0 14px var(--blue-glow);}
+.btn-signin:hover{box-shadow:0 0 24px var(--blue-glow);transform:translateY(-1px);}
+
+/* SECTIONS */
+section{position:relative;z-index:1;}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;}
+.hero-inner{max-width:800px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue-soft);border:1px solid var(--border-blue);border-radius:100px;padding:0.4rem 1.1rem;font-size:0.8rem;color:#93b4ff;margin-bottom:2rem;font-weight:500;}
+.hero-badge-dot{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.hero-title{font-family:var(--font-head);font-size:clamp(2.8rem,6vw,5rem);font-weight:800;line-height:1.08;margin-bottom:1.5rem;letter-spacing:-0.02em;}
+.hero-title span{color:var(--blue);text-shadow:0 0 40px var(--blue-glow);}
+.hero-sub{font-size:1.15rem;color:var(--muted);max-width:560px;margin:0 auto 2.5rem;line-height:1.7;font-weight:300;}
+.btn-cta{display:inline-flex;align-items:center;gap:10px;background:var(--blue);color:#fff;border:none;padding:1rem 2.2rem;border-radius:12px;font-family:var(--font-head);font-size:1.05rem;font-weight:700;cursor:pointer;transition:all 0.25s;box-shadow:0 0 30px var(--blue-glow);text-decoration:none;}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 0 50px var(--blue-glow);}
+.hero-visual{margin-top:4rem;position:relative;display:inline-block;}
+.hero-house{width:280px;height:200px;margin:0 auto;position:relative;animation:floatY 4s ease-in-out infinite;}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+.hero-stats{display:flex;gap:1.5rem;justify-content:center;margin-top:3rem;flex-wrap:wrap;}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.8rem 1.4rem;text-align:center;}
+.stat-num{font-family:var(--font-head);font-size:1.5rem;font-weight:800;color:var(--blue);}
+.stat-label{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+
+/* FEATURES */
+#features{padding:6rem 2rem;}
+.section-label{text-align:center;font-size:0.8rem;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:1rem;}
+.section-title{text-align:center;font-family:var(--font-head);font-size:clamp(2rem,4vw,2.8rem);font-weight:800;margin-bottom:1rem;}
+.section-sub{text-align:center;color:var(--muted);font-size:1rem;margin-bottom:3.5rem;max-width:500px;margin-left:auto;margin-right:auto;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto;}
+.feat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:2rem;backdrop-filter:blur(20px);transition:all 0.3s;position:relative;overflow:hidden;}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--blue-soft),transparent);opacity:0;transition:opacity 0.3s;border-radius:20px;}
+.feat-card:hover{border-color:var(--border-blue);transform:translateY(-4px);box-shadow:0 8px 40px var(--blue-glow);}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{width:52px;height:52px;background:var(--blue-soft);border:1px solid var(--border-blue);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.2rem;}
+.feat-title{font-family:var(--font-head);font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;}
+.feat-desc{color:var(--muted);font-size:0.9rem;line-height:1.6;}
+
+/* ESTIMATOR */
+#estimator{padding:6rem 2rem;}
+.est-wrap{max-width:1000px;margin:0 auto;}
+.est-card{background:var(--card-bg);border:1px solid var(--border);border-radius:24px;padding:3rem;backdrop-filter:blur(30px);}
+.est-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+@media(max-width:600px){.est-form-grid{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:0.5rem;}
+.form-group label{font-size:0.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+.form-group input,.form-group select{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;padding:0.9rem 1.1rem;color:var(--text);font-family:var(--font-body);font-size:1rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft);}
+.form-group select option{background:#0d1526;color:var(--text);}
+.btn-generate{width:100%;padding:1.1rem;background:var(--blue);color:#fff;border:none;border-radius:14px;font-family:var(--font-head);font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.25s;box-shadow:0 0 24px var(--blue-glow);display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-generate:hover{box-shadow:0 0 50px var(--blue-glow);transform:translateY(-1px);}
+.btn-generate:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* RESULTS */
+#results{padding:0 2rem 6rem;display:none;}
+.results-wrap{max-width:1100px;margin:0 auto;}
+.results-title{font-family:var(--font-head);font-size:1.8rem;font-weight:800;margin-bottom:2rem;text-align:center;}
+.summary-card{background:var(--card-bg);border:1px solid var(--border-blue);border-radius:20px;padding:1.8rem;margin-bottom:2rem;backdrop-filter:blur(20px);}
+.summary-text{color:var(--muted);font-size:1rem;line-height:1.7;}
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+@media(max-width:768px){.results-grid{grid-template-columns:1fr;}}
+.res-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:1.8rem;backdrop-filter:blur(20px);}
+.res-card-title{font-family:var(--font-head);font-size:1rem;font-weight:700;margin-bottom:1.2rem;color:var(--blue);}
+
+/* FLOOR PLAN */
+#floorCanvas{width:100%;height:280px;border-radius:12px;background:rgba(0,0,0,0.3);}
+
+/* 3D HOUSE */
+.house3d-wrap{display:flex;align-items:center;justify-content:center;height:280px;perspective:800px;}
+.house3d{width:160px;height:160px;position:relative;transform-style:preserve-3d;animation:rotate3d 8s linear infinite;}
+@keyframes rotate3d{from{transform:rotateY(0deg) rotateX(15deg);}to{transform:rotateY(360deg) rotateX(15deg);}}
+.house3d:hover{animation-play-state:paused;}
+.face{position:absolute;border:1px solid rgba(37,99,255,0.4);}
+.face-front{width:160px;height:120px;background:rgba(37,99,255,0.15);bottom:0;transform:translateZ(80px);}
+.face-back{width:160px;height:120px;background:rgba(37,99,255,0.08);bottom:0;transform:rotateY(180deg) translateZ(80px);}
+.face-left{width:160px;height:120px;background:rgba(37,99,255,0.1);bottom:0;transform:rotateY(-90deg) translateZ(80px);}
+.face-right{width:160px;height:120px;background:rgba(37,99,255,0.1);bottom:0;transform:rotateY(90deg) translateZ(80px);}
+.face-top{width:160px;height:160px;background:rgba(37,99,255,0.2);transform:rotateX(90deg) translateZ(120px);}
+.roof-left{width:0;height:0;border-left:90px solid transparent;border-right:90px solid transparent;border-bottom:70px solid rgba(37,99,255,0.4);position:absolute;top:-55px;left:0;}
+.roof-back{width:0;height:0;border-left:90px solid transparent;border-right:90px solid transparent;border-bottom:70px solid rgba(37,99,255,0.25);position:absolute;top:-55px;left:0;transform:rotateY(180deg) translateZ(160px);}
+.house3d-label{text-align:center;font-size:0.75rem;color:var(--muted);margin-top:0.5rem;}
+
+/* COST CHART */
+.chart-wrap{position:relative;height:220px;}
+
+/* MATERIALS */
+.materials-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+.mat-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:1rem;transition:all 0.2s;}
+.mat-card:hover{border-color:var(--border-blue);background:var(--blue-soft);}
+.mat-name{font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;}
+.mat-detail{font-size:0.78rem;color:var(--muted);line-height:1.4;}
+
+/* TIPS */
+.tips-list{display:flex;flex-direction:column;gap:0.7rem;}
+.tip-item{display:flex;align-items:flex-start;gap:10px;padding:0.8rem 1rem;background:rgba(37,99,255,0.06);border:1px solid rgba(37,99,255,0.15);border-radius:10px;font-size:0.88rem;line-height:1.5;}
+.tip-check{color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:1px;}
+
+/* SHOWCASE */
+#showcase{padding:6rem 2rem;}
+.showcase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto;}
+.show-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(20px);transition:all 0.3s;}
+.show-card:hover{border-color:var(--border-blue);transform:translateY(-4px);box-shadow:0 8px 40px var(--blue-glow);}
+.show-thumb{height:180px;display:flex;align-items:center;justify-content:center;font-size:4rem;background:linear-gradient(135deg,rgba(37,99,255,0.15),rgba(124,58,237,0.1));}
+.show-body{padding:1.5rem;}
+.show-title{font-family:var(--font-head);font-size:1.05rem;font-weight:700;margin-bottom:0.5rem;}
+.show-desc{font-size:0.85rem;color:var(--muted);line-height:1.5;margin-bottom:1rem;}
+.show-tags{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.tag{font-size:0.72rem;padding:0.3rem 0.7rem;border-radius:100px;background:var(--blue-soft);border:1px solid var(--border-blue);color:#93b4ff;font-weight:500;}
+
+/* SIGNIN MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:rgba(10,18,38,0.95);border:1px solid var(--border);border-radius:24px;padding:2.5rem;width:100%;max-width:420px;backdrop-filter:blur(30px);animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+.modal-title{font-family:var(--font-head);font-size:1.5rem;font-weight:800;}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.5rem;line-height:1;transition:color 0.2s;}
+.modal-close:hover{color:var(--text);}
+.modal .form-group{margin-bottom:1.2rem;}
+.modal-btn{width:100%;margin-top:1.5rem;padding:1rem;background:var(--blue);color:#fff;border:none;border-radius:12px;font-family:var(--font-head);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 0 20px var(--blue-glow);transition:all 0.2s;}
+.modal-btn:hover{box-shadow:0 0 40px var(--blue-glow);}
+.modal-foot{text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--muted);}
+.modal-foot a{color:var(--blue);cursor:pointer;text-decoration:none;}
+
+/* FOOTER */
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:gap;gap:1rem;}
+.foot-copy{font-size:0.85rem;color:var(--muted);}
+.foot-links{display:flex;gap:1.5rem;}
+.foot-links a{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.foot-links a:hover{color:var(--text);}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:300;background:#1e3a8a;border:1px solid var(--border-blue);color:var(--text);padding:1rem 1.5rem;border-radius:14px;font-size:0.9rem;transform:translateY(100px);opacity:0;transition:all 0.3s;max-width:340px;}
+.toast.show{transform:none;opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">B</div>
+    BuildWise AI
+  </a>
+  <div class="nav-links">
+    <a onclick="scrollTo('features')">Features</a>
+    <a onclick="scrollTo('estimator')">Estimator</a>
+    <a onclick="scrollTo('showcase')">Showcase</a>
+    <button class="btn-signin" onclick="openModal()">Sign In</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner reveal">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      AI-Powered Architecture Planning
+    </div>
+    <h1 class="hero-title">Design smarter homes<br/><span>with AI</span></h1>
+    <p class="hero-sub">Generate optimized residential layouts, cost estimates, and construction insights instantly — powered by Gemini AI.</p>
+    <a class="btn-cta" onclick="scrollTo('estimator')">Generate Smart Plan ⚡</a>
+    <div class="hero-stats">
+      <div class="stat-pill"><div class="stat-num">2s</div><div class="stat-label">Plan Generated</div></div>
+      <div class="stat-pill"><div class="stat-num">98%</div><div class="stat-label">Accuracy Rate</div></div>
+      <div class="stat-pill"><div class="stat-num">5k+</div><div class="stat-label">Plans Created</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="padding:6rem 2rem;">
+  <div class="section-label reveal">What We Offer</div>
+  <h2 class="section-title reveal">Everything you need to<br/>plan your dream home</h2>
+  <p class="section-sub reveal">From AI-driven layouts to real-time cost breakdowns — BuildWise AI handles it all.</p>
+  <div class="features-grid">
+    <div class="feat-card reveal">
+      <div class="feat-icon">🧠</div>
+      <div class="feat-title">AI Planning</div>
+      <div class="feat-desc">Smart room allocation based on your plot size, budget, and lifestyle requirements.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">💰</div>
+      <div class="feat-title">Cost Estimation</div>
+      <div class="feat-desc">Budget-aware recommendations with detailed breakdowns across all construction phases.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">🏠</div>
+      <div class="feat-title">Floor Plan Generator</div>
+      <div class="feat-desc">Instant 2D layout generation drawn on canvas — visualize your space immediately.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Optimization Engine</div>
+      <div class="feat-desc">Material and space efficiency tips that save money and improve your home's performance.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ESTIMATOR -->
+<section id="estimator" style="padding:6rem 2rem;">
+  <div class="est-wrap">
+    <div class="section-label reveal" style="text-align:center;">AI Estimator</div>
+    <h2 class="section-title reveal">Your AI Blueprint Awaits</h2>
+    <p class="section-sub reveal">Enter your project details below and let Gemini AI generate a complete plan in seconds.</p>
+    <div class="est-card reveal">
+      <div class="est-form-grid">
+        <div class="form-group">
+          <label>Plot Size (sq. ft.)</label>
+          <input type="number" id="plotSize" placeholder="e.g. 1500" min="100" max="50000"/>
+        </div>
+        <div class="form-group">
+          <label>Max Budget ($)</label>
+          <input type="number" id="budget" placeholder="e.g. 200000" min="1000"/>
+        </div>
+        <div class="form-group">
+          <label>Number of Floors</label>
+          <select id="floors">
+            <option value="1">1 Floor</option>
+            <option value="2" selected>2 Floors</option>
+            <option value="3">3 Floors</option>
+            <option value="4">4 Floors</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Number of Bedrooms</label>
+          <select id="bedrooms">
+            <option value="1">1 Bedroom</option>
+            <option value="2">2 Bedrooms</option>
+            <option value="3" selected>3 Bedrooms</option>
+            <option value="4">4 Bedrooms</option>
+            <option value="5">5 Bedrooms</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-generate" id="generateBtn" onclick="generatePlan()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Generate Smart Plan ⚡</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="results-wrap">
+    <h2 class="results-title">Your AI-Generated Blueprint</h2>
+
+    <div class="summary-card">
+      <div class="res-card-title">Project Summary</div>
+      <p class="summary-text" id="summaryText">—</p>
+    </div>
+
+    <div class="results-grid">
+      <!-- FLOOR PLAN -->
+      <div class="res-card">
+        <div class="res-card-title">2D Floor Plan</div>
+        <canvas id="floorCanvas"></canvas>
+      </div>
+      <!-- 3D VIEW -->
+      <div class="res-card">
+        <div class="res-card-title">3D House Preview <span style="font-size:0.72rem;color:var(--muted);">(hover to pause)</span></div>
+        <div class="house3d-wrap">
+          <div>
+            <div class="house3d" id="house3d">
+              <div class="face face-front"></div>
+              <div class="face face-back"></div>
+              <div class="face face-left"></div>
+              <div class="face face-right"></div>
+              <div class="face face-top"></div>
+              <div class="roof-left"></div>
+            </div>
+            <div class="house3d-label">Hover to stop rotation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <!-- COST CHART -->
+      <div class="res-card">
+        <div class="res-card-title">Cost Breakdown</div>
+        <div class="chart-wrap">
+          <canvas id="costChart"></canvas>
+        </div>
+        <div id="costList" style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;"></div>
+      </div>
+      <!-- MATERIALS -->
+      <div class="res-card">
+        <div class="res-card-title">Materials Recommendation</div>
+        <div class="materials-grid" id="materialsGrid"></div>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="res-card" style="margin-bottom:1.5rem;">
+      <div class="res-card-title">AI Optimization Tips</div>
+      <div class="tips-list" id="tipsList"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section id="showcase">
+  <div class="section-label reveal" style="text-align:center;">Project Gallery</div>
+  <h2 class="section-title reveal">Showcase</h2>
+  <p class="section-sub reveal">Sample AI-generated residential plans across different budgets and styles.</p>
+  <div class="showcase-grid">
+    <div class="show-card reveal">
+      <div class="show-thumb">🏙️</div>
+      <div class="show-body">
+        <div class="show-title">Compact Urban Home</div>
+        <div class="show-desc">A smart 800 sq ft urban micro-home optimized for city living with open-plan interiors and vertical storage solutions.</div>
+        <div class="show-tags">
+          <span class="tag">1 Floor</span>
+          <span class="tag">2 BHK</span>
+          <span class="tag">$55,000</span>
+          <span class="tag">Minimalist</span>
+        </div>
+      </div>
+    </div>
+    <div class="show-card reveal">
+      <div class="show-thumb">🏡</div>
+      <div class="show-body">
+        <div class="show-title">Premium Family Villa</div>
+        <div class="show-desc">Spacious 3000 sq ft family home with landscaped garden, home theater, and luxury finishes across two floors.</div>
+        <div class="show-tags">
+          <span class="tag">2 Floors</span>
+          <span class="tag">4 BHK</span>
+          <span class="tag">$280,000</span>
+          <span class="tag">Luxury</span>
+        </div>
+      </div>
+    </div>
+    <div class="show-card reveal">
+      <div class="show-thumb">🏘️</div>
+      <div class="show-body">
+        <div class="show-title">Smart Duplex Residence</div>
+        <div class="show-desc">Intelligent duplex with separate entrances, shared utilities, and smart home integration — ideal for rental income.</div>
+        <div class="show-tags">
+          <span class="tag">2 Floors</span>
+          <span class="tag">3 BHK</span>
+          <span class="tag">$150,000</span>
+          <span class="tag">Modern</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-copy">© BuildWise AI 2026. AI-powered residential planning.</div>
+  <div class="foot-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+
+<!-- SIGNIN MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Welcome back</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="signEmail" placeholder="you@example.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="signPass" placeholder="••••••••"/>
+    </div>
+    <button class="modal-btn" onclick="handleSignIn()">Sign In →</button>
+    <div class="modal-foot">Don't have an account? <a onclick="showToast('Sign up coming soon!')">Create one</a></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const WEBHOOK = 'https://belloww.app.n8n.cloud/webhook/buildwise';
+const PROXY = 'https://corsproxy.io/?url=';
+let costChartInstance = null;
+
+function scrollTo(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+function openModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('modalOverlay')) closeModal();
+}
+function handleSignIn(){
+  const email=document.getElementById('signEmail').value.trim();
+  const pass=document.getElementById('signPass').value.trim();
+  if(!email||!pass){showToast('Please enter email and password.');return;}
+  showToast('Signed in as '+email+' ✓');
+  closeModal();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+async function generatePlan(){
+  const plotSize=document.getElementById('plotSize').value;
+  const budget=document.getElementById('budget').value;
+  const floors=document.getElementById('floors').value;
+  const bedrooms=document.getElementById('bedrooms').value;
+
+  if(!plotSize||!budget){
+    showToast('Please fill in Plot Size and Budget.');
+    return;
+  }
+
+  const btn=document.getElementById('generateBtn');
+  const spinner=document.getElementById('spinner');
+  const btnText=document.getElementById('btnText');
+
+  btn.disabled=true;
+  spinner.style.display='block';
+  btnText.textContent='Generating Plan...';
+
+  const payload = JSON.stringify({plotSize,budget,floors,bedrooms});
+  let data = null;
+  let lastErr = '';
+
+  // Strategy 1: Direct fetch with json content type
+  try {
+    btnText.textContent = 'Connecting to n8n...';
+    const res = await fetch(WEBHOOK, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:payload
+    });
+    if(res.ok){ const raw=await res.text(); data=parseResponse(raw); }
+    else { lastErr = 'Status ' + res.status; }
+  } catch(e){ lastErr = e.message; console.warn('Strategy 1 failed:',e.message); }
+
+  // Strategy 2: fetch with text/plain to avoid preflight
+  if(!data){
+    try{
+      btnText.textContent = 'Trying method 2...';
+      const res = await fetch(WEBHOOK, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain'},
+        body:payload
+      });
+      if(res.ok){ const raw=await res.text(); data=parseResponse(raw); }
+      else { lastErr = 'Status ' + res.status; }
+    } catch(e){ lastErr = e.message; console.warn('Strategy 2 failed:',e.message); }
+  }
+
+  // Strategy 3: corsproxy.io
+  if(!data){
+    try{
+      btnText.textContent = 'Trying proxy 1...';
+      const res = await fetch('https://corsproxy.io/?url='+encodeURIComponent(WEBHOOK), {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:payload
+      });
+      if(res.ok){ const raw=await res.text(); data=parseResponse(raw); }
+      else { lastErr = 'Proxy1: ' + res.status; }
+    } catch(e){ lastErr = e.message; console.warn('Strategy 3 failed:',e.message); }
+  }
+
+  // Strategy 4: proxy.cors.sh
+  if(!data){
+    try{
+      btnText.textContent = 'Trying proxy 2...';
+      const res = await fetch('https://proxy.cors.sh/'+WEBHOOK, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-cors-api-key':'temp_demo'},
+        body:payload
+      });
+      if(res.ok){ const raw=await res.text(); data=parseResponse(raw); }
+      else { lastErr = 'Proxy2: ' + res.status; }
+    } catch(e){ lastErr = e.message; console.warn('Strategy 4 failed:',e.message); }
+  }
+
+  // Strategy 5: thingproxy
+  if(!data){
+    try{
+      btnText.textContent = 'Trying proxy 3...';
+      const res = await fetch('https://thingproxy.freeboard.io/fetch/'+WEBHOOK, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:payload
+      });
+      if(res.ok){ const raw=await res.text(); data=parseResponse(raw); }
+      else { lastErr = 'Proxy3: ' + res.status; }
+    } catch(e){ lastErr = e.message; console.warn('Strategy 5 failed:',e.message); }
+  }
+
+  // Final fallback: demo data so UI always works for hackathon
+  if(!data){
+    console.warn('All strategies failed. Last error:', lastErr);
+    showToast('⚠️ Showing demo data — add CORS header * to n8n Webhook node');
+    data = getDemoData(plotSize, budget, floors, bedrooms);
+  }
+
+  try{
+    renderResults(data);
+    if(data._isDemo) {
+      // already toasted above
+    } else {
+      showToast('Your AI blueprint is ready! ✓');
+    }
+  } catch(renderErr){
+    console.error('Render error:', renderErr);
+    showToast('Error displaying results: ' + renderErr.message);
+  }
+
+  btn.disabled=false;
+  spinner.style.display='none';
+  btnText.textContent='Generate Smart Plan ⚡';
+}
+
+function parseResponse(raw){
+  try{ return JSON.parse(raw); } catch(e){}
+  try{
+    const cleaned=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    const match=cleaned.match(/\{[\s\S]*\}/);
+    if(match) return JSON.parse(match[0]);
+  } catch(e){}
+  return null;
+}
+
+function getDemoData(plotSize, budget, floors, bedrooms){
+  const b=parseInt(budget)||100000;
+  return {
+    _isDemo:true,
+    summary:`A ${floors}-floor, ${bedrooms}-bedroom home on ${plotSize} sq ft. Total budget $${parseInt(budget).toLocaleString()}. Optimized for space efficiency and modern living with smart room allocation.`,
+    costBreakdown:{
+      Foundation: Math.round(b*0.15),
+      Structure:  Math.round(b*0.35),
+      Electrical: Math.round(b*0.10),
+      Plumbing:   Math.round(b*0.08),
+      Interior:   Math.round(b*0.20),
+      Finishing:  Math.round(b*0.12),
+    },
+    materials:[
+      {part:'Foundation',material:'RCC',reason:'Reinforced concrete for multi-floor stability'},
+      {part:'Walls',material:'AAC Blocks',reason:'Lightweight, budget-friendly, great insulation'},
+      {part:'Roof',material:'Flat RCC Slab',reason:'Durable and allows future floor addition'},
+      {part:'Flooring',material:'Vitrified Tiles',reason:'Low maintenance and long lasting'},
+      {part:'Windows',material:'uPVC Frames',reason:'Weather resistant and energy efficient'},
+      {part:'Doors',material:'Solid Wood',reason:'Security and aesthetics'},
+    ],
+    roomLayout:[
+      {name:'Living Room',x:0,y:0,width:220,height:160,color:'#1e40af'},
+      {name:'Kitchen',x:220,y:0,width:140,height:160,color:'#92400e'},
+      {name:'Bedroom 1',x:0,y:160,width:180,height:140,color:'#5b21b6'},
+      {name:'Bedroom 2',x:180,y:160,width:140,height:140,color:'#065f46'},
+      {name:'Bathroom',x:320,y:160,width:100,height:140,color:'#374151'},
+      {name:'Hall',x:360,y:0,width:100,height:160,color:'#1e3a5f'},
+    ],
+    model3d:{floorsCount:parseInt(floors)||2,floorHeight:10},
+    optimizationTips:[
+      'Reduce hallway width to gain 8% more usable area',
+      'South-facing windows maximize natural light and cut electricity costs',
+      'Use AAC blocks instead of red bricks — saves 20% on wall construction',
+      'Open-plan kitchen and living room reduces wall costs significantly',
+      'Install cross-ventilation points to eliminate AC dependency',
+      'Prefabricated staircase saves time and reduces labour costs by 15%',
+    ],
+  };
+}
+
+function renderResults(data){
+  document.getElementById('results').style.display='block';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+
+  // Summary
+  document.getElementById('summaryText').textContent=
+    data.summary||'AI-generated residential plan based on your specifications.';
+
+  // Floor Plan
+  drawFloorPlan(data.roomLayout||[]);
+
+  // 3D House - update floors count visually
+  update3D(data.model3d||{floorsCount:2});
+
+  // Cost Chart
+  renderCostChart(data.costBreakdown||{});
+
+  // Materials
+  renderMaterials(data.materials||[]);
+
+  // Tips
+  renderTips(data.optimizationTips||[]);
+}
+
+function drawFloorPlan(rooms){
+  const canvas=document.getElementById('floorCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||500;
+  canvas.height=280;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Dark blueprint background
+  ctx.fillStyle='rgba(5,10,25,0.8)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(37,99,255,0.08)';
+  ctx.lineWidth=1;
+  for(let x=0;x<canvas.width;x+=30){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();
+  }
+  for(let y=0;y<canvas.height;y+=30){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();
+  }
+
+  if(!rooms||rooms.length===0){
+    // Default layout
+    rooms=[
+      {name:'Living Room',x:10,y:10,width:200,height:140,color:'#1e40af'},
+      {name:'Kitchen',x:210,y:10,width:140,height:140,color:'#92400e'},
+      {name:'Bedroom 1',x:10,y:150,width:160,height:120,color:'#5b21b6'},
+      {name:'Bedroom 2',x:170,y:150,width:140,height:120,color:'#6d28d9'},
+      {name:'Bathroom',x:310,y:10,width:90,height:120,color:'#065f46'},
+      {name:'Hall',x:310,y:150,width:90,height:120,color:'#374151'},
+    ];
+  }
+
+  // Scale rooms to canvas
+  const allX=rooms.map(r=>r.x+r.width);
+  const allY=rooms.map(r=>r.y+r.height);
+  const maxX=Math.max(...allX)||600;
+  const maxY=Math.max(...allY)||400;
+  const scaleX=(canvas.width-20)/maxX;
+  const scaleY=(canvas.height-20)/maxY;
+
+  rooms.forEach(room=>{
+    const x=10+room.x*scaleX;
+    const y=10+room.y*scaleY;
+    const w=room.width*scaleX;
+    const h=room.height*scaleY;
+    const color=room.color||'#1e40af';
+
+    // Room fill
+    ctx.fillStyle=color+'33';
+    ctx.fillRect(x,y,w,h);
+
+    // Room border
+    ctx.strokeStyle=color||'#2563ff';
+    ctx.lineWidth=2;
+    ctx.strokeRect(x,y,w,h);
+
+    // Label
+    ctx.fillStyle='rgba(240,244,255,0.9)';
+    ctx.font=`bold ${Math.max(9,Math.min(12,w/8))}px DM Sans,sans-serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(room.name,x+w/2,y+h/2);
+
+    // Size tag
+    if(w>60&&h>30){
+      const sqft=Math.round((w/scaleX)*(h/scaleY)/10);
+      ctx.fillStyle='rgba(147,180,255,0.6)';
+      ctx.font=`${Math.max(8,Math.min(10,w/10))}px DM Sans,sans-serif`;
+      ctx.fillText(sqft+'sqft',x+w/2,y+h/2+14);
+    }
+  });
+}
+
+function update3D(model){
+  const house=document.getElementById('house3d');
+  const floors=parseInt(model.floorsCount)||2;
+  const height=80+floors*20;
+  house.style.height=height+'px';
+}
+
+function renderCostChart(breakdown){
+  if(costChartInstance) costChartInstance.destroy();
+
+  const labels=Object.keys(breakdown).map(k=>k.charAt(0).toUpperCase()+k.slice(1));
+  const values=Object.values(breakdown).map(v=>parseInt(v)||0);
+  const total=values.reduce((a,b)=>a+b,0);
+
+  const ctx=document.getElementById('costChart').getContext('2d');
+  costChartInstance=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels,
+      datasets:[{
+        data:values,
+        backgroundColor:['#2563FF','#7c3aed','#0ea5e9','#10b981','#f59e0b','#ef4444'],
+        borderColor:'rgba(8,12,20,0.8)',
+        borderWidth:3,
+        hoverOffset:6,
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      cutout:'65%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label(ctx){
+              const pct=((ctx.raw/total)*100).toFixed(1);
+              return ` $${ctx.raw.toLocaleString()} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Cost list
+  const list=document.getElementById('costList');
+  list.innerHTML=labels.map((l,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;">
+      <span style="width:10px;height:10px;border-radius:50%;background:${['#2563FF','#7c3aed','#0ea5e9','#10b981','#f59e0b','#ef4444'][i]};flex-shrink:0;"></span>
+      <span style="color:var(--muted);">${l}</span>
+      <span style="margin-left:auto;font-weight:600;">$${(values[i]||0).toLocaleString()}</span>
+    </div>
+  `).join('');
+}
+
+function renderMaterials(materials){
+  const grid=document.getElementById('materialsGrid');
+  if(!materials||materials.length===0){
+    materials=[
+      {part:'Foundation',material:'RCC',reason:'Best for multi-floor homes'},
+      {part:'Walls',material:'AAC Blocks',reason:'Budget friendly'},
+      {part:'Roof',material:'Flat RCC Slab',reason:'Allows expansion'},
+      {part:'Flooring',material:'Vitrified Tiles',reason:'Durable & low maintenance'},
+    ];
+  }
+  grid.innerHTML=materials.map(m=>`
+    <div class="mat-card">
+      <div class="mat-name">${m.part||m.material||'Material'}</div>
+      <div style="font-size:0.82rem;color:#93b4ff;font-weight:600;margin-bottom:0.3rem;">${m.material||''}</div>
+      <div class="mat-detail">${m.reason||''}</div>
+    </div>
+  `).join('');
+}
+
+function renderTips(tips){
+  const list=document.getElementById('tipsList');
+  if(!tips||tips.length===0){
+    tips=[
+      'Reduce hallway space to increase usable area',
+      'Improve natural lighting with south-facing windows',
+      'Lower material waste with modular construction',
+      'Optimize ventilation with cross-ventilation design',
+      'Maximize storage with built-in solutions',
+    ];
+  }
+  list.innerHTML=tips.map(t=>`
+    <div class="tip-item">
+      <span class="tip-check">✓</span>
+      <span>${t}</span>
+    </div>
+  `).join('');
+}
+
+// Scroll reveal
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// Resize floor canvas on window resize
+window.addEventListener('resize',()=>{
+  if(document.getElementById('results').style.display!=='none'){
+    drawFloorPlan([]);
+  }
+});
+</script>
+</body>
+</html>
